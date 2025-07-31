@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:collection/collection.dart'; 
+// import 'package:collection/collection.dart';
 import '../../models/transaction.dart' as mymodel;
 import '../../providers/transaction_provider.dart';
 
@@ -50,8 +50,6 @@ class _LaporanPageState extends State<LaporanPage> {
 
         for (var t in filteredTransactions) {
           if (t.type == mymodel.TransactionType.expense) {
-            // >>>>>> PERBAIKAN DI SINI <<<<<<
-            // Gunakan t.categoryName ?? 'Lain-lain' untuk memastikan kuncinya String non-nullable
             expenseByCategory.update(t.categoryName ?? 'Lain-lain', (value) => value + t.amount,
                 ifAbsent: () => t.amount);
           } else if (t.type == mymodel.TransactionType.income) {
@@ -148,7 +146,6 @@ class _LaporanPageState extends State<LaporanPage> {
           margin: const EdgeInsets.symmetric(vertical: 4.0),
           child: ListTile(
             leading: Icon(
-              // Anda mungkin perlu logika untuk mendapatkan ikon berdasarkan categoryName jika disimpan terpisah
               Icons.category, // Default icon
               color: color,
             ),

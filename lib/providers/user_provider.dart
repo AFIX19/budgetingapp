@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Pastikan ini diimport
+import 'package:firebase_auth/firebase_auth.dart'; 
 
 class UserProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -14,15 +14,12 @@ class UserProvider with ChangeNotifier {
     });
   }
 
-  // Method untuk sign in
+  // method untuk sign in
   Future<void> signIn(String email, String password) async {
     try {
-      // Panggil Firebase Auth untuk sign in dengan email dan password
+      // memanggil firebaseauth untuk sign in dengan email dan password
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      // Jika berhasil, authStateChanges listener akan otomatis mengupdate _currentUser
-      // dan notifyListeners() akan dipanggil.
     }
-    // Tangkap error spesifik dari Firebase Authentication
     on FirebaseAuthException catch (e) {
       String errorMessage;
       switch (e.code) {
@@ -42,17 +39,17 @@ class UserProvider with ChangeNotifier {
           errorMessage = 'Terjadi kesalahan saat login: ${e.message ?? 'Unknown error'}';
           break;
       }
-      // Lempar kembali pesan error yang sudah di-format agar bisa ditangkap oleh UI (LoginPage)
+      //melempar pesan kembali
       throw errorMessage;
     }
-    // Tangkap error umum lainnya (misalnya masalah jaringan)
+    // menangkap error umum lainnya , kayak masalah jaringan
     catch (e) {
       print("Error signing in (general): $e"); // Untuk debugging
       throw 'Gagal login. Mohon periksa koneksi internet Anda atau coba lagi nanti.';
     }
   }
 
-  // Method untuk sign out
+  // method untuk sign out
   Future<void> signOut() async {
     try {
       await _auth.signOut();

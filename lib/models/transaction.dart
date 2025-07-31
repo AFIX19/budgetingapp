@@ -1,4 +1,3 @@
-// lib/models/transaction.dart (Pastikan file ini diperbarui!)
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -11,13 +10,14 @@ class Transaction {
   final double amount;
   final DateTime date;
   final TransactionType type;
-  final String? categoryId; // <<< Tambah ini
+  final String? categoryId;
   final String? categoryName;
   final IconData? categoryIcon;
   final Color? categoryColor;
+  final String? category;
   final String? fromAccount;
   final String? toAccount;
-  final String? note; // <<< Tambah ini
+  final String? note; 
   final DateTime createdAt;
 
   Transaction({
@@ -27,13 +27,14 @@ class Transaction {
     required this.amount,
     required this.date,
     required this.type,
-    this.categoryId, // <<< Tambah ini
+    this.categoryId, 
     this.categoryName,
     this.categoryIcon,
     this.categoryColor,
+    this.category,
     this.fromAccount,
     this.toAccount,
-    this.note, // <<< Tambah ini
+    this.note, 
     required this.createdAt,
   });
 
@@ -44,13 +45,14 @@ class Transaction {
     double? amount,
     DateTime? date,
     TransactionType? type,
-    String? categoryId, // <<< Tambah ini
+    String? categoryId, 
     String? categoryName,
     IconData? categoryIcon,
     Color? categoryColor,
+    String? category,
     String? fromAccount,
     String? toAccount,
-    String? note, // <<< Tambah ini
+    String? note, 
     DateTime? createdAt,
   }) {
     return Transaction(
@@ -60,13 +62,14 @@ class Transaction {
       amount: amount ?? this.amount,
       date: date ?? this.date,
       type: type ?? this.type,
-      categoryId: categoryId ?? this.categoryId, // <<< Tambah ini
+      categoryId: categoryId ?? this.categoryId,
       categoryName: categoryName ?? this.categoryName,
       categoryIcon: categoryIcon ?? this.categoryIcon,
       categoryColor: categoryColor ?? this.categoryColor,
+      category: category ?? this.category,
       fromAccount: fromAccount ?? this.fromAccount,
       toAccount: toAccount ?? this.toAccount,
-      note: note ?? this.note, // <<< Tambah ini
+      note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -121,13 +124,14 @@ class Transaction {
         (e) => e.name == data['type'],
         orElse: () => TransactionType.expense,
       ),
-      categoryId: data['categoryId'] as String?, // <<< Ambil dari Firestore
+      categoryId: data['categoryId'] as String?, //mengambil id category dari firestore
       categoryName: data['categoryName'] as String?,
       categoryIcon: parseIconData(data),
       categoryColor: parseColor(data['categoryColorValue']),
+      category: data['category'] as String?,
       fromAccount: data['fromAccount'] as String?,
       toAccount: data['toAccount'] as String?,
-      note: data['note'] as String?, // <<< Ambil dari Firestore
+      note: data['note'] as String?, //mengambil note dari firestore
       createdAt: parseDate(data['createdAt']),
     );
   }
@@ -139,15 +143,17 @@ class Transaction {
       'amount': amount,
       'date': Timestamp.fromDate(date),
       'type': type.name,
-      'categoryId': categoryId, // <<< Simpan ke Firestore
+
+      'categoryId': categoryId, //disimpan di firestore
       'categoryName': categoryName,
       'categoryIconCode': categoryIcon?.codePoint,
       'categoryIconFamily': categoryIcon?.fontFamily,
       'categoryIconPackage': categoryIcon?.fontPackage,
       'categoryColorValue': categoryColor?.value,
+      'category': category,
       'fromAccount': fromAccount,
       'toAccount': toAccount,
-      'note': note, // <<< Simpan ke Firestore
+      'note': note,//simpan ke firestore
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

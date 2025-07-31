@@ -22,7 +22,6 @@ class TransactionProvider with ChangeNotifier {
             .orderBy('date', descending: true)
             .snapshots()
             .listen((snapshot) {
-              // >>>>>> PERBAIKAN DI SINI <<<<<<
               _transactions = snapshot.docs.map((doc) => mymodel.Transaction.fromFirestore(doc)).toList();
               notifyListeners();
             }, onError: (error) {
@@ -69,7 +68,6 @@ class TransactionProvider with ChangeNotifier {
           .orderBy('date', descending: true)
           .get();
 
-      // >>>>>> PERBAIKAN DI SINI <<<<<<
       _transactions = snapshot.docs.map((doc) => mymodel.Transaction.fromFirestore(doc)).toList();
     } catch (e) {
       print('Error fetching transactions for month: $e');

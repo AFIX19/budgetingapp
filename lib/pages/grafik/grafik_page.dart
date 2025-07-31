@@ -27,15 +27,17 @@ class GrafikContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final transactions = context.watch<TransactionProvider>().transactions;
     final expenseTransactions = transactions
-        .where((t) => t.type == 'expense')
+        .where((t) => t.type == TransactionType.expense)
 
         .toList();
     final incomeTransactions = transactions
-        .where((t) => t.type == 'income')
+        .where((t) => t.type == TransactionType.income)
         .toList();
 
-    return Column(
-      children: [
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         if (incomeTransactions.isNotEmpty) ...[
           const Text(
             'Pemasukan',
@@ -54,6 +56,7 @@ class GrafikContent extends StatelessWidget {
           _buildPieChart(expenseTransactions, 'expense')
         ],
       ],
+      ),
     );
   }
 
@@ -87,15 +90,16 @@ class GrafikContent extends StatelessWidget {
     );
   }).toList();
 
-  return AspectRatio(
-    aspectRatio: 1.3,
-    child: PieChart(
-      PieChartData(
-        sections: sections,
-        centerSpaceRadius: 40,
-        sectionsSpace: 2,
-      ),
+  return SizedBox(
+  height: 200, 
+  child: PieChart(
+    PieChartData(
+      sections: sections,
+      centerSpaceRadius: 40,
+      sectionsSpace: 2,
     ),
-  );
+  ),
+);
+
 }
 }

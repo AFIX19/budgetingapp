@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import ini untuk Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 import 'database/firebase_options.dart';
 import 'pages/home/home_page.dart';
 import 'pages/grafik/grafik_page.dart';
 import 'pages/laporan/laporan_page.dart';
 import 'pages/profile/profile_page.dart';
-import 'pages/transaction/add_edit_record_page.dart'; // Pastikan ini sudah benar (AddEditRecordPage)
-import 'auth/pages/login_page.dart'; // Import halaman login kamu
+import 'pages/transaction/add_edit_record_page.dart';
+import 'auth/pages/login_page.dart';
 import 'providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'providers/transaction_provider.dart';
@@ -54,11 +54,10 @@ class BudgetApp extends StatelessWidget {
             labelLarge: TextStyle(color: Colors.white),
           ),
         ),
-        // --- Bagian ini yang diubah ---
+
         home: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(), // Mendengarkan perubahan status autentikasi
           builder: (context, snapshot) {
-            // Tampilkan loading spinner saat menunggu status autentikasi
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 backgroundColor: Colors.black,
@@ -67,25 +66,17 @@ class BudgetApp extends StatelessWidget {
                 ),
               );
             }
-            // Jika ada data (pengguna sudah login)
             if (snapshot.hasData) {
-              return const HomePage(); // Arahkan ke MainPage (halaman utama dengan bottom nav)
+              return const MainPage(); 
             }
-            // Jika tidak ada data (pengguna belum login)
-            return const LoginPage(); // Arahkan ke LoginPage
+            return const LoginPage();
           },
         ),
-        // --- Akhir perubahan ---
         debugShowCheckedModeBanner: false,
       ),
     );
   }
 }
-
-// MainPage dan kode lainnya tetap sama seperti yang sudah kamu berikan.
-// Pastikan saja path untuk import di atas sudah benar:
-// import 'pages/add_edit_record_page.dart'; // Jika namamu AddEditRecordPage
-// import 'pages/login_page.dart'; // Pastikan ada file ini
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

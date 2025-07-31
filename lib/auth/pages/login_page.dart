@@ -3,17 +3,6 @@ import 'package:provider/provider.dart'; // Penting: Import provider
 import '../../providers/user_provider.dart'; // Import UserProvider Anda
 import 'package:budgetting_app/auth/pages/register_page.dart'; // Pastikan path ini benar
 
-// Pastikan import MainPage ini benar. Jika MainPage ada di lib/screens/main_page.dart
-// maka ini sudah benar. Jika MainPage ada di main.dart, gunakan import '../../main.dart';
-// Saya berasumsi MainPage sekarang di lib/screens/main_page.dart
-// import '../../screens/main_page.dart'; // Hapus ini jika Anda mengandalkan main.dart untuk navigasi otomatis
-
-// Hapus import yang tidak diperlukan lagi atau yang redundant:
-// import 'package:firebase_auth/firebase_auth.dart'; // Tidak langsung digunakan di sini
-// import '../../main.dart'; // Tidak diperlukan jika main.dart yang menangani navigasi
-// import '../services/auth_service.dart'; // Akan dihapus karena diganti UserProvider
-
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 

@@ -4,7 +4,7 @@ import '../pages/home/home_page.dart';
 import '../pages/grafik/grafik_page.dart';
 import '../pages/laporan/laporan_page.dart';
 import '../pages/profile/profile_page.dart';
-import '../pages/transaction/add_edit_record_page.dart'; // Import halaman tambah/edit
+import '../pages/transaction/add_edit_record_page.dart'; 
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,9 +18,9 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const HomePage(),
-    const GrafikPage(), // Pastikan GrafikPage sudah ada
-    const SizedBox(), // Placeholder untuk FAB Add
-    const LaporanPage(), // Pastikan LaporanPage sudah ada
+    const GrafikPage(), 
+    const SizedBox(), 
+    const LaporanPage(), 
     const ProfilePage(),
   ];
 
@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.black,
         selectedItemColor: Colors.yellow,
         unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed, // Penting untuk 5 item
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt),
@@ -59,7 +59,7 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Grafik',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle, size: 40), // Ukuran lebih besar untuk FAB
+            icon: Icon(Icons.add_circle, size: 40), 
             label: 'Tambah',
           ),
           BottomNavigationBarItem(

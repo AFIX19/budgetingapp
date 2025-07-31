@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Untuk FilteringTextInputFormatter
+import 'package:flutter/services.dart'; 
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart'; // Untuk menghasilkan ID unik
+import 'package:uuid/uuid.dart'; 
 import 'package:provider/provider.dart';
 import '../../models/transaction.dart' as mymodel;
 import '../../providers/transaction_provider.dart';
-import '../../providers/user_provider.dart'; // Import UserProvider
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Untuk ikon FontAwesome
-import '../../models/category.dart'; // Pastikan path ini benar untuk model Category Anda
+import '../../providers/user_provider.dart'; 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
+import '../../models/category.dart';
 
 class AddEditRecordPage extends StatefulWidget {
   final mymodel.Transaction? transactionToEdit;
@@ -27,14 +27,12 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
   // State untuk form
   mymodel.TransactionType _selectedType = mymodel.TransactionType.expense; // Default expense
   DateTime _selectedDate = DateTime.now();
-  String? _selectedCategory; // ID kategori
-  String? _selectedFromAccount; // Nama akun asal
-  String? _selectedToAccount; // Nama akun tujuan
+  String? _selectedCategory;
+  String? _selectedFromAccount; 
+  String? _selectedToAccount; 
 
-  // Dummy list akun (Nanti ini akan diganti dengan AccountProvider)
   final List<String> _dummyAccounts = ['Cash', 'Bank Account', 'E-Wallet'];
 
-  // Dummy categories. Idealnya ini dari CategoryProvider atau global static list
   final List<Category> _expenseCategories = [
     Category(id: 'cat_belanja', name: 'Belanja', icon: FontAwesomeIcons.shoppingBag, color: Colors.blue),
     Category(id: 'cat_makan', name: 'Makan & Minum', icon: FontAwesomeIcons.utensils, color: Colors.orange),
@@ -55,15 +53,13 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
   void initState() {
     super.initState();
     if (widget.transactionToEdit != null) {
-      // Inisialisasi dari transaksi yang akan diedit
       final t = widget.transactionToEdit!;
       _selectedType = t.type;
-      _amountController.text = t.amount.toStringAsFixed(0); // Tanpa desimal
+      _amountController.text = t.amount.toStringAsFixed(0);
       _titleController.text = t.title;
       _noteController.text = t.note ?? '';
       _selectedDate = t.date;
 
-      // Inisialisasi kategori/akun berdasarkan tipe
       if (t.type == mymodel.TransactionType.income || t.type == mymodel.TransactionType.expense) {
         _selectedCategory = t.categoryId;
         _selectedFromAccount = t.fromAccount;
@@ -72,8 +68,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         _selectedToAccount = t.toAccount;
       }
     } else {
-      // Set default account for new record
-      if (_dummyAccounts.isNotEmpty) {
+        if (_dummyAccounts.isNotEmpty) {
         _selectedFromAccount = _dummyAccounts.first;
       }
     }
@@ -98,10 +93,10 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         return Theme(
           data: ThemeData.dark().copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: Colors.yellow, // Warna header tanggal
-              onPrimary: Colors.black, // Warna teks di header tanggal
-              onSurface: Colors.white, // Warna teks di kalender
-              surface: Color(0xFF1C1C1C), // Warna background kalender
+              primary: Colors.yellow, // warna untuk header tanggal
+              onPrimary: Colors.black, // warna teks untuk header tanggal
+              onSurface: Colors.white, // warna teks untuk kalender
+              surface: Color(0xFF1C1C1C), // warna untuk background kalender
             ),
             dialogBackgroundColor: const Color(0xFF1C1C1C),
           ),
@@ -116,7 +111,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
     }
   }
 
-  // Fungsi untuk menyimpan transaksi
+  // fungsi untuk menyimpan transaksi
   Future<void> _saveTransaction() async {
     final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -136,24 +131,24 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
       final title = _titleController.text;
       final note = _noteController.text.isEmpty ? null : _noteController.text;
 
-      // Dapatkan objek Category lengkap
+      // untuk mendapatkan objek category lengkap
       Category? selectedCategoryObject;
       if (_selectedType == mymodel.TransactionType.expense) {
         selectedCategoryObject = _expenseCategories.firstWhere(
             (cat) => cat.id == _selectedCategory,
-            orElse: () => _expenseCategories.first // Default jika tidak ditemukan (error case)
+            orElse: () => _expenseCategories.first // hanya untuk default saja jika tidak ditemukan "error case"
         );
       } else if (_selectedType == mymodel.TransactionType.income) {
         selectedCategoryObject = _incomeCategories.firstWhere(
             (cat) => cat.id == _selectedCategory,
-            orElse: () => _incomeCategories.first // Default jika tidak ditemukan (error case)
+            orElse: () => _incomeCategories.first // hanya untuk default saja jika tidak ditemukan "error case"
         );
       }
 
       mymodel.Transaction newTransaction;
 
       if (widget.transactionToEdit != null) {
-        // Mode Edit
+        // untuk edit
         newTransaction = widget.transactionToEdit!.copyWith(
           amount: amount,
           title: title,
@@ -166,11 +161,11 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
           categoryColor: selectedCategoryObject?.color,
           fromAccount: _selectedFromAccount,
           toAccount: _selectedType == mymodel.TransactionType.transfer ? _selectedToAccount : null,
-          userId: userId, // Pastikan userId tidak berubah saat edit
+          userId: userId, 
         );
         await transactionProvider.updateTransaction(newTransaction);
       } else {
-        // Mode Tambah Baru
+        // untuk mode tambah baru
         newTransaction = mymodel.Transaction(
           id: const Uuid().v4(),
           userId: userId,
@@ -198,18 +193,16 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.of(context).pop(true); // Kembali ke halaman sebelumnya dan beri sinyal sukses
+      Navigator.of(context).pop(true); // untuk kembali ke halaman sebelumnya dan memberi sinyal sukses 
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Gunakan Consumer untuk UserProvider di sini jika Anda ingin menampilkan
-    // sesuatu terkait user di halaman ini, tapi untuk userId, Provider.of(listen: false) sudah cukup.
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.transactionToEdit == null ? 'Tambah Rekaman Baru' : 'Edit Rekaman',
+          widget.transactionToEdit == null ? 'Tambah Rekaman Baru' : 'Edit Catatan',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -218,11 +211,10 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // Pemilihan Tipe Transaksi (Pemasukan/Pengeluaran/Transfer)
+            // untuk memilih tipe transaksi untuk (pemasukan/pengeluaran/transfer)
             _buildTypeSelection(),
             const SizedBox(height: 20),
-
-            // Input Jumlah
+            // untuk menginput jumlah
             TextFormField(
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -242,8 +234,9 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')), // Hanya angka dan desimal (maks 2)
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')), // hanya untuk angka dan desimal saja dan max: 2 saja
               ],
+              //untuk validator ketika tambah jumlah 
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Jumlah tidak boleh kosong';
@@ -256,7 +249,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
             ),
             const SizedBox(height: 20),
 
-            // Input Judul/Nama Transaksi
+            // untuk input judul
             TextFormField(
               controller: _titleController,
               style: const TextStyle(color: Colors.white),
@@ -270,7 +263,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
             ),
             const SizedBox(height: 20),
 
-            // Pemilihan Tanggal
+            // memilih tanggal
             _buildDateSelection(),
             const SizedBox(height: 20),
 
@@ -486,7 +479,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         }
         if (_selectedType == mymodel.TransactionType.transfer &&
             _selectedFromAccount == _selectedToAccount &&
-            _selectedFromAccount != null) { // Jika transfer dan akun asal & tujuan sama
+            _selectedFromAccount != null) {
               return 'Akun asal dan tujuan tidak boleh sama.';
         }
         return null;

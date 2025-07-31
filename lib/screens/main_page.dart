@@ -96,7 +96,7 @@ class _MainPageState extends State<MainPage> {
         );
 
         if (result == true && _selectedIndex == 0) {
-          setState(() {}); // Refresh HomePage
+          setState(() {}); // merefresh HomePage
         }
       },
       borderRadius: BorderRadius.circular(30),

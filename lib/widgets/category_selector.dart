@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/transaction_type.dart';
+import '../data/enums/transaction_type.dart';
 
 class CategorySelector extends StatelessWidget {
   final TransactionType selectedType;

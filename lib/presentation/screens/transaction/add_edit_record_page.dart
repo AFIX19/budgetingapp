@@ -71,6 +71,12 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         if (_dummyAccounts.isNotEmpty) {
         _selectedFromAccount = _dummyAccounts.first;
       }
+      // Set default category for new transaction
+      if (_selectedType == mymodel.TransactionType.expense && _expenseCategories.isNotEmpty) {
+        _selectedCategory = _expenseCategories.first.id;
+      } else if (_selectedType == mymodel.TransactionType.income && _incomeCategories.isNotEmpty) {
+        _selectedCategory = _incomeCategories.first.id;
+      }
     }
   }
 
@@ -197,12 +203,33 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
     }
   }
 
+  void _onTypeChanged(mymodel.TransactionType newType) {
+    setState(() {
+      _selectedType = newType;
+      // Reset category and set a default when type changes
+      _selectedCategory = null;
+      if (newType == mymodel.TransactionType.income && _incomeCategories.isNotEmpty) {
+        _selectedCategory = _incomeCategories.first.id;
+      } else if (newType == mymodel.TransactionType.expense && _expenseCategories.isNotEmpty) {
+        _selectedCategory = _expenseCategories.first.id;
+      }
+
+      // Reset 'To Account' if it's not a transfer
+      if (newType != mymodel.TransactionType.transfer) {
+        _selectedToAccount = null;
+      } else if (_selectedFromAccount == _selectedToAccount) {
+        // Ensure 'To Account' is not the same as 'From Account' for a new transfer
+        _selectedToAccount = _dummyAccounts.where((acc) => acc != _selectedFromAccount).firstOrNull;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.transactionToEdit == null ? 'Tambah Rekaman Baru' : 'Edit Catatan',
+          widget.transactionToEdit == null ? 'Tambah Catatan Baru' : 'Edit Catatan',
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
@@ -253,7 +280,10 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
             TextFormField(
               controller: _titleController,
               style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Judul Transaksi', Icons.text_fields),
+              decoration: InputDecoration(
+              labelText: 'Judul Transaksi',
+              labelStyle: TextStyle(color: Colors.grey[400]!, ),
+               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Judul tidak boleh kosong';
@@ -295,7 +325,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
             TextFormField(
               controller: _noteController,
               style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Catatan (Opsional)', Icons.description),
+              decoration: _inputDecoration('Catatan (Opsional)', Icons.description, color: Colors.grey[400]!),
               maxLines: 3,
             ),
             const SizedBox(height: 30),
@@ -319,7 +349,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  InputDecoration _inputDecoration(String label, IconData icon, {required Color color}) {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: Colors.grey[400]),
@@ -354,16 +384,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
   Widget _buildTypeButton(mymodel.TransactionType type, String label, Color color) {
     final bool isSelected = _selectedType == type;
     return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          _selectedType = type;
-          // untuk reset kategori/akun tujuan saat tipe berubah
-          _selectedCategory = null;
-          if (type != mymodel.TransactionType.transfer && _selectedFromAccount == _selectedToAccount) {
-            _selectedToAccount = null; // reset jika akun sama pada transfer
-          }
-        });
-      },
+      onPressed: () => _onTypeChanged(type),
       style: ElevatedButton.styleFrom(
         backgroundColor: isSelected ? color : const Color(0xFF1C1C1C),
         foregroundColor: isSelected ? Colors.black : Colors.white,
@@ -376,10 +397,14 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
   }
 
   Widget _buildDateSelection() {
-    return InkWell(
+    return GestureDetector(
       onTap: () => _selectDate(context),
       child: InputDecorator(
-        decoration: _inputDecoration('Tanggal', Icons.calendar_today),
+        decoration: InputDecoration(
+          labelText:'Tanggal', 
+          labelStyle: TextStyle(color: Colors.grey[400]!),
+          ),
+      
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -399,14 +424,6 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
     List<Category> categories = _selectedType == mymodel.TransactionType.income
         ? _incomeCategories
         : _expenseCategories;
-
-    if (_selectedCategory == null && categories.isNotEmpty) {
-      _selectedCategory = categories.first.id;
-    } else if (_selectedCategory != null && !categories.any((cat) => cat.id == _selectedCategory)) {
-      _selectedCategory = categories.first.id;
-    }
-
-
     return DropdownButtonFormField<String>(
       value: _selectedCategory,
       items: categories.map((Category category) {
@@ -426,7 +443,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
           _selectedCategory = newValue;
         });
       },
-      decoration: _inputDecoration('Kategori', Icons.category),
+      decoration: _inputDecoration('Kategori', Icons.category, color: Colors.grey[400]!),
       dropdownColor: const Color(0xFF1C1C1C),
       style: const TextStyle(color: Colors.white),
       validator: (value) {
@@ -440,18 +457,6 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
 
   Widget _buildAccountDropdown(String label, String? currentValue,
       ValueChanged<String?> onChanged, List<String> accountList) {
-
-    if (currentValue == null && accountList.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onChanged(accountList.first);
-      });
-    } else if (currentValue != null && !accountList.contains(currentValue)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onChanged(accountList.first);
-      });
-    }
-
-
     return DropdownButtonFormField<String>(
       value: currentValue,
       items: accountList.map((String account) {
@@ -461,7 +466,11 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
         );
       }).toList(),
       onChanged: onChanged,
-      decoration: _inputDecoration(label, Icons.account_balance_wallet),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[400]!),
+        prefixIcon: Icon (Icons.account_balance_wallet, color:Colors.yellow),
+        ),
       dropdownColor: const Color(0xFF1C1C1C),
       style: const TextStyle(color: Colors.white),
       validator: (value) {

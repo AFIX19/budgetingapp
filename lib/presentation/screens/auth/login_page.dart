@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:budgetting_app/providers/user_provider.dart';
-import 'package:budgetting_app/presentation/screens/auth/register_page.dart'; 
+import 'package:budgetting_app/presentation/screens/auth/register_page.dart';
+import 'package:budgetting_app/services/auth_service.dart';
+import 'widgets/login_form_field.dart';
+import 'widgets/login_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,50 +14,69 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();              //key untuk validasi form
+  final _emailController = TextEditingController(); 
   final _passwordController = TextEditingController();
 
+  // String? _emailError;
+  // String? _passwordError;
+  
+  bool _isObscure = true;
   bool _isLoading = false;
-  String? _errorMessage;
+
 
   Future<void> _submitAuthForm() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    if (!_formKey.currentState!.validate()) return;
 
-    // mengambil instance userprovider
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final validation = AuthService.validateLogin(
+    _emailController.text.trim(),
+    _passwordController.text.trim(),
+);
 
-    try {
-      // panggil method signIn dari userprovider
-      await userProvider.signIn(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: const Text(
-          "Login behasil! Selamat datang gaes!",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-        ),
-      );
+if (validation != null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(validation)),
+  );
+  return; // stop di sini
+}
 
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().contains('firebase_auth')
-            ? 'Email atau password salah.' 
-            : 'Terjadi kesalahan: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() => _isLoading = true);
+    // final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // panggil authservice sign in
+    final error = await AuthService.signIn(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (error == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login Berhasil! Selamat Datang Gaes!"),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // pindah ke halaman home
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
   @override
@@ -75,89 +97,92 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 80),
-            const Text(
-              'Selamat Datang',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const Text(
-              'Kelola keuanganmu dengan mudah!',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-            const SizedBox(height: 50),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Email', Icons.email),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Password', Icons.lock),
-            ),
-            const SizedBox(height: 20),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
-                  textAlign: TextAlign.center,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 80),
+              const Text(
+                'Selamat Datang',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submitAuthForm, 
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              const Text(
+                'Kelola keuanganmu dengan mudah!',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.black)
-                  : const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
-                    ),
-            ),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RegisterPage()),
-                );
-              },
-              child: const Text(
-                'Belum punya akun? Daftar Sekarang',
-                style: TextStyle(color: Colors.yellow),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              const SizedBox(height: 50),
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(color: Colors.grey[400]),
-      prefixIcon: Icon(icon, color: Colors.yellow),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.grey[800]!),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.yellow),
-        borderRadius: BorderRadius.circular(10),
+              // form email
+              LoginFormField(
+                controller: _emailController,
+                label: "Email",
+                icon: Icons.email,
+                isPassword: false,
+                obscureText: false,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? "Email tidak boleh kosong"
+                    : null,
+              ),
+              const SizedBox(height: 20),
+
+              // form password
+              LoginFormField(
+                controller: _passwordController,
+                label: "Password",
+                icon: Icons.lock,
+                isPassword: true,
+                obscureText: _isObscure,
+                validator: (value) => (value == null || value.isEmpty)
+                    ? "Password tidak boleh kosong"
+                    : null,
+                onToggleVisibility: () {
+                  setState(() => _isObscure = !_isObscure);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // tombol login
+              LoginButton(
+                isLoading: _isLoading, 
+                onPressed: _submitAuthForm
+                ),
+
+              const SizedBox(height: 15),
+
+              // tombol ke arah register
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterPage()),
+                  );
+
+                  //reset form & field  ketika kembali dari register
+                  _formKey.currentState?.reset();
+                  _emailController.clear();
+                  _passwordController.clear();
+
+                  setState(() {
+                    _isObscure = true;
+                    _isLoading = false;
+                  });
+                },
+                child: const Text(
+                  'Belum punya akun? Daftar Sekarang',
+                  style: TextStyle(color: Colors.yellow),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

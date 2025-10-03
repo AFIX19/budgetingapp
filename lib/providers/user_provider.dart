@@ -36,7 +36,7 @@ class UserProvider with ChangeNotifier {
           errorMessage = 'Akun Anda telah dinonaktifkan.';
           break;
         default:
-          errorMessage = 'Terjadi kesalahan saat login: ${e.message ?? 'Unknown error'}';
+          errorMessage = e.message ?? 'Unknown error';
           break;
       }
       //melempar pesan kembali
@@ -44,12 +44,12 @@ class UserProvider with ChangeNotifier {
     }
     // menangkap error umum lainnya , kayak masalah jaringan
     catch (e) {
-      print("Error signing in (general): $e"); // Untuk debugging
+      print("Error: $e"); // Untuk debugging
       throw 'Gagal login. Mohon periksa koneksi internet Anda atau coba lagi nanti.';
     }
   }
 
-  // method untuk sign out
+  // untuk sign out
   Future<void> signOut() async {
     try {
       await _auth.signOut();
@@ -60,13 +60,13 @@ class UserProvider with ChangeNotifier {
   }
 
 
-  // Method untuk mendaftar pengguna baru
+  //untuk mendaftar pengguna baru
   Future<void> signUp(String email, String password) async {
     try {
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
     } catch (e) {
       print("Error signing up: $e");
-      rethrow; // Penting untuk melempar error agar bisa ditangani di UI
+      rethrow; 
     }
   }
 }
